@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>力度彈弓 · 音樂力度木工互動教具</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --sky-top:#a8defc;
+    --sky-mid:#cdebfc;
+    --cream-light:#fffefb;
+    --cream-mid:#fdf8ec;
+    --cream-dark:#efe5cf;
+    --wood-light:#d99b5e;
+    --wood-mid:#b87638;
+    --wood-dark:#7d491b;
+    --crate-top:#f59f56;
+    --crate-bot:#d97829;
+    --grass:#70c44e;
+    --ink:#3a2e25;
+    --muted:#78685a;
+    --acc:#ff7b47;
+    --acc-dark:#c94d1e;
+  }
+  html { scroll-behavior:smooth; }
+  body {
+    font-family:"PingFang TC","Microsoft JhengHei","Rounded Mplus 1c",system-ui,sans-serif;
+    background:linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 42%, #f7f1e3 42%, #efe6d2 100%);
+    background-attachment:fixed;
+    color:var(--ink);
+    line-height:1.65;
+    overflow-x:hidden;
+  }
+  .serif { font-family:Georgia,"Times New Roman",serif; font-style:italic; font-weight:bold; }
+
+  /* 擬物化黃銅鉚釘與螺絲 */
+  .rivet {
+    width:11px; height:11px; border-radius:50%;
+    background:radial-gradient(circle at 32% 32%, #fff3c4, #e0af3e 65%, #946b10 100%);
+    border:1.5px solid #573d06;
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.8), 0 1px 2px rgba(58,46,37,.35);
+    display:inline-block; position:relative; flex:none;
+  }
+  .rivet::after {
+    content:""; position:absolute; left:2px; right:2px; top:3.5px; height:1.2px;
+    background:#6b4c08; transform:rotate(-30deg);
+  }
+
+  /* 擬物化發光小指示珠 */
+  . jewel {
+    width:10px; height:10px; border-radius:50%; display:inline-block;
+    border:1.5px solid rgba(58,46,37,.5);
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.85), 0 1px 2px rgba(0,0,0,.2);
+  }
+  .jewel.red { background:radial-gradient(circle at 35% 35%, #ff9a92, #f05248 65%, #a82018); }
+  .jewel.amber { background:radial-gradient(circle at 35% 35%, #ffea9f, #ffc83b 65%, #b8820a); }
+  .jewel.green { background:radial-gradient(circle at 35% 35%, #a3f0b8, #52bf7a 65%, #237841); }
+
+  /* ================= 頂部木質導覽列（與遊戲頂部 Bar 呼應） ================= */
+  header {
+    position:sticky; top:0; z-index:100;
+    background:linear-gradient(180deg, rgba(255,253,247,.95) 0%, rgba(244,236,218,.95) 100%);
+    backdrop-filter:blur(8px);
+    border-bottom:3px solid #c9b79c;
+    box-shadow:inset 0 1px 0 #fff, 0 4px 14px rgba(58,46,37,.12);
+    padding:10px 24px;
+  }
+  .navWrap {
+    max-width:1200px; margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  }
+  .brand {
+    display:inline-flex; align-items:center; gap:10px; text-decoration:none;
+    background:linear-gradient(180deg, #fffefb 0%, #f5ebd6 100%);
+    padding:6px 16px 6px 8px; border-radius:999px;
+    border:2px solid #ccb89b;
+    box-shadow:inset 0 1px 0 #fff, 0 3px 0 #b8a384, 0 4px 8px rgba(58,46,37,.12);
+    color:var(--ink); font-weight:900; font-size:17px; letter-spacing:.5px;
+  }
+  .brandIcon {
+    width:32px; height:32px; border-radius:50%;
+    background:linear-gradient(180deg, #ff8e5e 0%, #ed622b 100%);
+    border:2px solid #fff;
+    box-shadow:0 2px 4px rgba(58,46,37,.25);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:Georgia,serif; font-weight:bold; font-size:17px;
+  }
+
+  .navLinks { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+  /* 擬物化奶油木質按鍵 */
+  .woodBtn {
+    text-decoration:none; font-size:13.5px; font-weight:800; color:var(--ink);
+    padding:7px 14px; border-radius:11px; cursor:pointer;
+    background:linear-gradient(180deg, #fffefb 0%, #f2e6cf 100%);
+    border:2px solid #c4b093;
+    box-shadow:inset 0 1px 0 #fff, 0 3px 0 #b09b7d, 0 4px 6px rgba(58,46,37,.12);
+    text-shadow:0 1px 0 #fff;
+    display:inline-flex; align-items:center; gap:6px;
+    transition:transform .08s, box-shadow .08s, filter .12s;
+  }
+  .woodBtn:hover { filter:brightness(1.03); transform:translateY(-1px); }
+  .woodBtn:active {
+    transform:translateY(2px);
+    box-shadow:inset 0 2px 3px rgba(58,46,37,.2), 0 1px 0 #b09b7d;
+  }
+  .woodBtn.dark {
+    background:linear-gradient(180deg, #4a3f37 0%, #2e2620 100%);
+    color:#fffdf7; border-color:#1f1915; text-shadow:0 -1px 0 #000;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 3px 0 #1a1411, 0 4px 6px rgba(0,0,0,.22);
+  }
+  .woodBtn.red {
+    background:linear-gradient(180deg, #f25c52 0%, #d4352b 100%);
+    color:#fff; border-color:#9e1e15; text-shadow:0 -1px 0 rgba(0,0,0,.4);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.35), 0 3px 0 #8c1911, 0 4px 6px rgba(0,0,0,.2);
+  }
+  .woodBtn.orange {
+    background:linear-gradient(180deg, #ff8e52 0%, #f06424 100%);
+    color:#fff; border-color:#b5400b; text-shadow:0 -1px 0 rgba(0,0,0,.35);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4), 0 3px 0 #9e3506, 0 4px 6px rgba(0,0,0,.2);
+  }
+
+  /* ================= 主容器 ================= */
+  main { max-width:1200px; margin:0 auto; padding:28px 20px 72px; }
+
+  /* ================= 遊戲主題木框主視覺 (Hero Wooden Toy Box) ================= */
+  .toyFrame {
+    background:linear-gradient(135deg, var(--wood-light) 0%, var(--wood-mid) 55%, var(--wood-dark) 100%);
+    border:3px solid #4a2a0c; border-radius:26px;
+    padding:14px; margin-bottom:42px;
+    box-shadow:
+      inset 0 2px 1px rgba(255,235,205,.45),
+      inset 0 -3px 6px rgba(50,25,5,.55),
+      0 12px 0 #593310,
+      0 20px 38px rgba(58,46,37,.28);
+    position:relative;
+  }
+  .creamBoard {
+    background:linear-gradient(180deg, var(--cream-light) 0%, var(--cream-mid) 65%, var(--cream-dark) 100%);
+    border:2.5px solid #6e4823; border-radius:18px;
+    padding:36px 36px; position:relative;
+    box-shadow:inset 0 2px 0 #fff, inset 0 -2px 6px rgba(110,72,35,.15);
+    display:grid; grid-template-columns:1.18fr 0.82fr; gap:32px; align-items:center;
+  }
+  @media (max-width: 900px) {
+    .creamBoard { grid-template-columns:1fr; text-align:center; padding:30px 22px; }
+  }
+  .cornerRivet { position:absolute; }
+  .cornerRivet.tl { top:12px; left:12px; }
+  .cornerRivet.tr { top:12px; right:12px; }
+  .cornerRivet.bl { bottom:12px; left:12px; }
+  .cornerRivet.br { bottom:12px; right:12px; }
+
+  /* 皮革縫線標籤 */
+  .stitchedTag {
+    display:inline-flex; align-items:center; gap:8px;
+    background:linear-gradient(180deg, #8a5629 0%, #693e18 100%);
+    color:#fff6e5; font-size:12.5px; font-weight:800; letter-spacing:1px;
+    padding:5px 14px; border-radius:8px;
+    border:1.5px dashed rgba(255,235,200,.55);
+    box-shadow:0 2px 4px rgba(58,46,37,.25);
+    margin-bottom:14px;
+  }
+  .creamBoard h1 {
+    font-size:clamp(27px, 3.6vw, 40px); font-weight:900; line-height:1.25;
+    color:var(--ink); text-shadow:0 1px 0 #fff; margin-bottom:12px; letter-spacing:.5px;
+  }
+  .creamBoard h1 span.hl { color:#d94e1f; }
+  .heroDesc {
+    font-size:16px; font-weight:700; color:var(--muted); margin-bottom:24px; max-width:580px;
+  }
+  @media (max-width: 900px) { .heroDesc { margin-left:auto; margin-right:auto; } }
+
+  /* 實體凹槽按鍵托盤與 START 按鈕 */
+  .buttonTray {
+    display:inline-flex; align-items:center; gap:14px; flex-wrap:wrap;
+    background:#e6d8be; padding:10px 14px; border-radius:16px;
+    border:1.5px solid #baa582;
+    box-shadow:inset 0 3px 6px rgba(58,46,37,.22), 0 1px 0 #fff;
+  }
+  @media (max-width: 900px) { .buttonTray { justify-content:center; } }
+
+  .tactileStartBtn {
+    cursor:pointer; text-decoration:none;
+    background:linear-gradient(180deg, #ff8f52 0%, #ff6b2b 50%, #e04d10 100%);
+    color:#fff; font-size:19px; font-weight:900; letter-spacing:1.5px;
+    padding:14px 32px; border-radius:12px;
+    border:2px solid #8f2d04;
+    box-shadow:
+      inset 0 2px 1px rgba(255,255,255,.65),
+      inset 0 -2px 3px rgba(120,30,0,.4),
+      0 6px 0 #8f2d04,
+      0 8px 16px rgba(58,46,37,.35);
+    text-shadow:0 -1px 1px rgba(120,30,0,.75);
+    display:inline-flex; align-items:center; gap:10px;
+    transition:transform .08s, box-shadow .08s, filter .12s;
+  }
+  .tactileStartBtn:hover { filter:brightness(1.06); transform:translateY(-1px); }
+  .tactileStartBtn:active {
+    transform:translateY(5px);
+    box-shadow:inset 0 2px 5px rgba(0,0,0,.4), 0 1px 0 #8f2d04;
+  }
+  .playTriangle {
+    width:24px; height:24px; border-radius:50%;
+    background:#fffdf7; border:1.5px solid #8f2d04;
+    box-shadow:inset 0 1px 2px rgba(0,0,0,.2);
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .playTriangle svg { width:11px; height:11px; fill:#e04d10; margin-left:2px; }
+
+  /* 右側：微縮晴空草原木盒劇場 (Diorama Box - 直接預覽遊戲元素) */
+  .dioramaBox {
+    background:linear-gradient(180deg, #9ad9fc 0%, #b8e6fe 68%, #70c44e 68%, #5ca83d 100%);
+    border:3px solid #593818; border-radius:16px;
+    padding:14px 14px 10px; position:relative;
+    box-shadow:inset 0 4px 12px rgba(30,60,90,.28), 0 2px 0 #fff;
+    overflow:hidden;
+  }
+  .dioramaLabel {
+    position:absolute; top:10px; left:12px;
+    background:rgba(255,253,247,.9); border:1.5px solid #cbb89d;
+    padding:2px 10px; border-radius:999px;
+    font-size:11.5px; font-weight:800; color:var(--ink);
+    box-shadow:0 2px 4px rgba(0,0,0,.1);
+  }
+  .dioramaRack {
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-top:8px;
+  }
+  .dChip {
+    background:linear-gradient(180deg, #fffefb 0%, #f0e4ce 100%);
+    border:1.5px solid #4a3520; border-radius:8px; padding:4px 6px;
+    text-align:center; font-size:12.5px; font-weight:800; color:var(--ink);
+    box-shadow:0 2px 0 rgba(58,46,37,.35);
+  }
+
+  /* ================= 內嵌遊戲木製舞台窗 ================= */
+  .stageSection { scroll-margin-top:80px; margin-bottom:54px; }
+  .stageFrame {
+    background:linear-gradient(180deg, var(--wood-light) 0%, var(--wood-mid) 50%, var(--wood-dark) 100%);
+    border:3px solid #4a2a0c; border-radius:24px;
+    padding:14px; transition:all .25s;
+    box-shadow:
+      inset 0 2px 1px rgba(255,235,205,.45),
+      0 10px 0 #593310,
+      0 18px 36px rgba(58,46,37,.3);
+  }
+  .stageFrame.theater {
+    max-width:96vw; width:96vw; margin-left:calc(50% - 48vw);
+  }
+  .stageToolbar {
+    display:flex; align-items:center; justify-content:space-between;
+    background:linear-gradient(180deg, #fffefb 0%, #efe3cc 100%);
+    border:2px solid #6e4823; border-radius:14px;
+    padding:8px 16px; margin-bottom:12px; flex-wrap:wrap; gap:10px;
+    box-shadow:inset 0 1px 0 #fff, 0 3px 6px rgba(58,46,37,.2);
+  }
+  .windowLights { display:flex; align-items:center; gap:8px; }
+  .stageTitle {
+    font-size:14.5px; font-weight:900; color:var(--ink); margin-left:6px;
+    text-shadow:0 1px 0 #fff;
+  }
+  .stageActions { display:flex; gap:8px; flex-wrap:wrap; }
+
+  .iframeRecess {
+    width:100%; height:min(78vh, 680px); min-height:520px;
+    border-radius:14px; overflow:hidden;
+    border:3px solid #4a2a0c;
+    box-shadow:inset 0 4px 10px rgba(0,0,0,.35);
+    background:#b8e6fe; position:relative;
+  }
+  .stageFrame.theater .iframeRecess { height:84vh; }
+  iframe#gameFrame { width:100%; height:100%; border:none; display:block; }
+
+  /* 與遊戲彈窗風格一致的奶油木框啟動遮罩 */
+  #startOverlay {
+    position:absolute; inset:0; z-index:20;
+    background:rgba(35,45,65,.42);
+    backdrop-filter:blur(4px);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:24px; text-align:center;
+    transition:opacity .3s ease, visibility .3s ease;
+  }
+  #startOverlay.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+  .ovBoard {
+    background:linear-gradient(180deg, #fffefb 0%, #f5ebd6 100%);
+    border:3px solid #7d491b; border-radius:22px;
+    padding:34px 40px; max-width:520px; position:relative;
+    box-shadow:
+      inset 0 2px 0 #fff,
+      0 10px 0 #593310,
+      0 22px 48px rgba(0,0,0,.45);
+    color:var(--ink);
+  }
+  .ovTag {
+    display:inline-block; background:#ffe8d6; color:#b84314;
+    font-size:12px; font-weight:900; letter-spacing:1.5px;
+    padding:4px 12px; border-radius:999px; border:1.5px solid #f0b899;
+    margin-bottom:10px;
+  }
+  .ovBoard h3 { font-size:24px; font-weight:900; margin-bottom:8px; color:var(--ink); }
+  .ovBoard p { font-size:15px; color:var(--muted); margin-bottom:24px; font-weight:700; }
+
+  /* ================= 區塊木牌標題 ================= */
+  .secHead { text-align:center; margin-bottom:28px; }
+  .woodSign {
+    display:inline-flex; align-items:center; gap:12px;
+    background:linear-gradient(180deg, #d99b5e 0%, #b37032 100%);
+    border:2px solid #593310; border-radius:10px;
+    padding:6px 18px; margin-bottom:10px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 4px 0 #593310, 0 6px 12px rgba(58,46,37,.2);
+    color:#fffdf7; font-size:12.5px; font-weight:900; letter-spacing:1.5px;
+    text-shadow:0 -1px 0 rgba(0,0,0,.4);
+  }
+  .secHead h2 { font-size:28px; font-weight:900; color:var(--ink); text-shadow:0 1px 0 #fff; margin-bottom:4px; }
+  .secHead p { color:var(--muted); font-weight:700; font-size:15.5px; }
+
+  /* ================= 四步驟奶油木紋卡片 ================= */
+  .grid4 {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+    gap:20px; margin-bottom:54px;
+  }
+  .stepCard {
+    background:linear-gradient(180deg, #fffefb 0%, #f5ecda 100%);
+    border:2.5px solid #b89f7d; border-radius:18px;
+    padding:24px 22px; position:relative;
+    box-shadow:inset 0 2px 0 #fff, 0 6px 0 #b89f7d, 0 10px 20px rgba(58,46,37,.12);
+  }
+  .stepHeader {
+    display:flex; align-items:center; justify-content:space-between;
+    padding-bottom:12px; margin-bottom:12px;
+    border-bottom:2px dashed #dcd0bc;
+  }
+  .stepBadge {
+    background:linear-gradient(180deg, #ff8b3d 0%, #e06516 100%);
+    color:#fff; font-weight:900; font-size:12.5px; letter-spacing:1px;
+    padding:4px 12px; border-radius:8px; border:1.5px solid #9e3f04;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4), 0 2px 0 #9e3f04;
+  }
+  .stepCard h3 { font-size:18px; font-weight:900; color:var(--ink); margin-bottom:6px; }
+  .stepCard p { font-size:14.5px; color:var(--muted); font-weight:700; }
+
+  /* ================= 遊戲木箱音箱造型「力度試聽鍵」（與遊戲內的木箱塔完全呼應） ================= */
+  .crateGrid {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(175px, 1fr));
+    gap:16px; margin-bottom:54px;
+  }
+  .cratePad {
+    background:linear-gradient(180deg, var(--crate-top) 0%, var(--crate-bot) 100%);
+    border:2.5px solid #6e3508; border-radius:16px;
+    padding:16px 14px 14px; text-align:center; cursor:pointer;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,.45),
+      inset 0 -3px 0 rgba(90,40,0,.22),
+      0 7px 0 #783a09,
+      0 12px 20px rgba(58,46,37,.22);
+    position:relative;
+    transition:transform .08s, box-shadow .08s, filter .12s;
+  }
+  .cratePad:hover { filter:brightness(1.04); transform:translateY(-2px); }
+  .cratePad:active, .cratePad.playing {
+    transform:translateY(5px);
+    box-shadow:
+      inset 0 2px 5px rgba(0,0,0,.35),
+      0 2px 0 #783a09,
+      0 4px 8px rgba(58,46,37,.2);
+  }
+  .crateInner {
+    background:linear-gradient(180deg, #fffefb 0%, #f7efe0 100%);
+    border:2px solid #8a4813; border-radius:11px;
+    padding:14px 10px 12px; margin-top:4px;
+    box-shadow:inset 0 2px 4px rgba(58,46,37,.1);
+    display:flex; flex-direction:column; align-items:center; gap:5px;
+  }
+  /* 與遊戲木塔頂端完全相同的雙圈力度圓牌 */
+  .towerMedallion {
+    width:56px; height:56px; border-radius:50%;
+    padding:5px; border:2.5px solid var(--ink);
+    box-shadow:0 3px 0 rgba(58,46,37,.25), inset 0 1px 0 rgba(255,255,255,.5);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:2px;
+  }
+  .medallionCore {
+    width:100%; height:100%; border-radius:50%;
+    background:#fffdf7; border:1.5px solid rgba(58,46,37,.2);
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px;
+  }
+  .cratePad h4 { font-size:17px; font-weight:900; color:var(--ink); }
+  .cratePad .ital { font-size:12px; color:var(--muted); font-style:italic; font-weight:800; }
+  .rangeSlot {
+    width:88%; height:9px; background:#e3d7c3; border-radius:999px;
+    padding:1.5px; border:1.5px solid #8c7a65;
+    box-shadow:inset 0 1px 2px rgba(0,0,0,.25); margin:3px 0;
+  }
+  .rangeFill { height:100%; border-radius:999px; }
+  .cratePad p { font-size:12.5px; color:#544639; font-weight:700; }
+  .tapHint {
+    font-size:11px; font-weight:900; color:#fffdf7; letter-spacing:1px;
+    text-shadow:0 1px 1px rgba(0,0,0,.45);
+  }
+
+  /* ================= 雙欄操作與模式面板 ================= */
+  .grid2 {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(340px, 1fr));
+    gap:22px; margin-bottom:54px;
+  }
+  .infoPanel {
+    background:linear-gradient(180deg, #fffefb 0%, #f5ecda 100%);
+    border:2.5px solid #b89f7d; border-radius:20px;
+    padding:26px 28px; position:relative;
+    box-shadow:inset 0 2px 0 #fff, 0 6px 0 #b89f7d, 0 10px 20px rgba(58,46,37,.12);
+  }
+  .infoPanel h3 {
+    font-size:19px; font-weight:900; color:var(--ink);
+    padding-bottom:12px; margin-bottom:16px;
+    border-bottom:2px dashed #dcd0bc;
+  }
+  .keyList { list-style:none; display:flex; flex-direction:column; gap:12px; }
+  .keyList li { display:flex; align-items:center; gap:12px; font-size:14.5px; font-weight:700; color:#4f4136; }
+  kbd {
+    background:linear-gradient(180deg, #fffefb 0%, #e8dcc8 100%);
+    border:2px solid #9e896c; border-radius:8px;
+    padding:4px 10px; font-family:monospace; font-size:13px; font-weight:900;
+    color:var(--ink); white-space:nowrap;
+    box-shadow:inset 0 1px 0 #fff, 0 3px 0 #9e896c;
+  }
+
+  /* ================= 創作者與音樂頻道木製共鳴箱專區 (含兩個指定超連結) ================= */
+  .creatorBox {
+    background:linear-gradient(135deg, #c78446 0%, #995c24 100%);
+    border:3px solid #4a2a0c; border-radius:22px;
+    padding:12px;
+    box-shadow:inset 0 2px 0 rgba(255,235,205,.45), 0 8px 0 #593310, 0 16px 32px rgba(58,46,37,.25);
+  }
+  .creatorInner {
+    background:linear-gradient(180deg, #fffefb 0%, #f5ebd6 100%);
+    border:2px solid #6e4823; border-radius:14px;
+    padding:28px 34px; position:relative;
+    display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;
+  }
+  .creatorText { max-width:560px; }
+  .creatorText .cLabel {
+    display:inline-block; background:#ffe8d6; color:#b84314;
+    font-size:11.5px; font-weight:900; letter-spacing:1.5px;
+    padding:3px 10px; border-radius:6px; border:1px solid #f0b899;
+    margin-bottom:8px;
+  }
+  .creatorText h3 { font-size:23px; font-weight:900; color:var(--ink); margin-bottom:6px; }
+  .creatorText p { color:var(--muted); font-size:15px; font-weight:700; }
+
+  .creatorLinks { display:flex; gap:14px; flex-wrap:wrap; }
+  .socialHardwareBtn {
+    text-decoration:none; padding:12px 22px; border-radius:12px;
+    font-size:15px; font-weight:900;
+    display:inline-flex; align-items:center; gap:12px;
+    transition:transform .08s, box-shadow .08s, filter .12s;
+  }
+  .socialHardwareBtn:hover { filter:brightness(1.06); transform:translateY(-2px); }
+  .socialHardwareBtn:active { transform:translateY(3px); }
+
+  .socialHardwareBtn.threads {
+    background:linear-gradient(180deg, #3b3530 0%, #1f1b18 100%);
+    color:#fffdf7; border:2px solid #0d0b09;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 5px 0 #0d0b09, 0 8px 14px rgba(58,46,37,.3);
+  }
+  .socialHardwareBtn.youtube {
+    background:linear-gradient(180deg, #f0483e 0%, #c42218 100%);
+    color:#fff; border:2px solid #781009;
+    box-shadow:inset 0 1px 0 rgba(255,200,195,.45), 0 5px 0 #781009, 0 8px 14px rgba(58,46,37,.3);
+  }
+  .emblemBox {
+    width:34px; height:34px; border-radius:8px;
+    background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.25);
+    display:flex; align-items:center; justify-content:center;
+    font-family:Georgia,serif; font-weight:bold; font-size:15px;
+  }
+
+  footer {
+    text-align:center; padding:28px 20px;
+    border-top:2px dashed #cbb89d;
+    color:var(--muted); font-size:14px; font-weight:800;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  .footerLinks { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }
+  .footerLinks a { color:var(--ink); text-decoration:underline; text-underline-offset:4px; }
+  .footerLinks a:hover { color:var(--acc-dark); }
+</style>
+</head>
+<body>
+
+<!-- 頂部奶油木質導覽列（與遊戲內 #unifiedBar 視覺一致） -->
+<header>
+  <div class="navWrap">
+    <a href="#" class="brand">
+      <span class="brandIcon">♫</span>
+      <span>力度彈弓 · 音樂力度教室</span>
+    </a>
+    <nav class="navLinks">
+      <a href="#gameStage" class="woodBtn">互動遊戲舞台</a>
+      <a href="#howToPlay" class="woodBtn">四步驟玩法</a>
+      <a href="#dynamicsGuide" class="woodBtn">木箱音箱試聽</a>
+      <a href="https://www.threads.com/@lycbert" target="_blank" rel="noopener noreferrer" class="woodBtn dark" title="前往 Threads @lycbert">
+        <span>Threads @lycbert</span>
+      </a>
+      <a href="https://www.youtube.com/@datoemusic" target="_blank" rel="noopener noreferrer" class="woodBtn red" title="前往 YouTube @datoemusic">
+        <span>YouTube @datoemusic</span>
+      </a>
+      <a href="game.html" target="_blank" class="woodBtn orange">
+        <span>獨立全螢幕視窗</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- 遊戲主題木框主視覺 (含擬物化 START 大按鈕與微縮遊戲場景模型盒) -->
+  <section class="toyFrame">
+    <div class="creamBoard">
+      <span class="rivet cornerRivet tl"></span>
+      <span class="rivet cornerRivet tr"></span>
+      <span class="rivet cornerRivet bl"></span>
+      <span class="rivet cornerRivet br"></span>
+
+      <div>
+        <div class="stitchedTag">
+          <span class="jewel green"></span>
+          <span>國小一至五年級 · 音樂力度拋物線教具</span>
+        </div>
+        <h1>拉動手作木彈弓、聽小鼓強弱，<br>帶<span class="hl">「音樂山雀」</span>擊倒力度木塔</h1>
+        <p class="heroDesc">
+          將義大利文音樂力度術語結合晴空草原上的拋物線物理與真實小鼓動態。拉弓距離越長、代表音樂力度越強，讓學生透過視覺射程與聽覺強弱直覺學會 <span class="serif">pp</span> 至 <span class="serif">ff</span> 的漸強與漸弱。
+        </p>
+        <div class="buttonTray">
+          <button class="tactileStartBtn" id="heroStartBtn">
+            <span class="playTriangle">
+              <svg viewBox="0 0 12 14"><polygon points="1,1 11,7 1,13"/></svg>
+            </span>
+            <span>START 開始挑戰</span>
+          </button>
+          <a href="game.html" target="_blank" class="woodBtn" style="padding:13px 20px;font-size:15px;">
+            <span>開啟獨立遊戲頁</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 右側：直接還原 game.html 晴空草原、木彈弓、藍天山雀與木箱塔的立體模型窗 -->
+      <div class="dioramaBox">
+        <span class="dioramaLabel">STAGE PREVIEW · 晴空草原舞台</span>
+        <svg viewBox="0 0 280 155" width="100%" height="155" aria-label="力度彈弓遊戲場景模型">
+          <!-- 五線譜微風線 -->
+          <path d="M 0 38 Q 70 30 140 38 T 280 38" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.5"/>
+          <path d="M 0 46 Q 70 38 140 46 T 280 46" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.5"/>
+          <path d="M 0 54 Q 70 46 140 54 T 280 54" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.5"/>
+          <!-- 遠山與草地線 -->
+          <path d="M 0 106 Q 60 82 130 106 T 280 100 L 280 112 L 0 112 Z" fill="#9ca8e0" opacity="0.6"/>
+          <line x1="0" y1="112" x2="280" y2="112" stroke="#3a2e25" stroke-width="2.5"/>
+          <!-- 手作Y型木彈弓 -->
+          <g transform="translate(42, 112)">
+            <rect x="-14" y="-6" width="28" height="8" rx="3" fill="#959aa8" stroke="#3a2e25" stroke-width="2"/>
+            <path d="M-5,-5 L-3,-36 L3,-36 L5,-5 Z" fill="#99642f" stroke="#3a2e25" stroke-width="2"/>
+            <path d="M-2,-35 Q-10,-46 -11,-56" fill="none" stroke="#3a2e25" stroke-width="7" stroke-linecap="round"/>
+            <path d="M-2,-35 Q-10,-46 -11,-56" fill="none" stroke="#c48849" stroke-width="4.5" stroke-linecap="round"/>
+            <path d="M2,-35 Q10,-46 11,-56" fill="none" stroke="#3a2e25" stroke-width="7" stroke-linecap="round"/>
+            <path d="M2,-35 Q10,-46 11,-56" fill="none" stroke="#c48849" stroke-width="4.5" stroke-linecap="round"/>
+          </g>
+          <!-- 動態拋物線軌跡 -->
+          <path id="previewArc" d="M 42 58 Q 130 4 232 68" fill="none" stroke="#ff7b47" stroke-width="3.5" stroke-dasharray="6 5" stroke-linecap="round"/>
+          <!-- 飛行中的藍天山雀 -->
+          <g transform="translate(96, 36) rotate(-12)">
+            <path d="M-12,2 L-20,-3 L-17,2 L-21,6 L-12,5 Z" fill="#2884b8" stroke="#3a2e25" stroke-width="2" stroke-linejoin="round"/>
+            <ellipse cx="0" cy="0" rx="15" ry="13.5" fill="#4bb8e8" stroke="#3a2e25" stroke-width="2.5"/>
+            <ellipse cx="3" cy="4.5" rx="9.5" ry="7.5" fill="#fffdf7"/>
+            <ellipse cx="-4" cy="2" rx="6.5" ry="4.2" fill="#2884b8" stroke="#3a2e25" stroke-width="2" transform="rotate(-15 -4 2)"/>
+            <circle cx="1" cy="-2" r="2.2" fill="#3a2e25"/>
+            <circle cx="8.5" cy="-2" r="2" fill="#3a2e25"/>
+            <polygon points="4,-1 11,1 4,4" fill="#ff9f1c" stroke="#3a2e25" stroke-width="1.8" stroke-linejoin="round"/>
+          </g>
+          <!-- 三座不同距離的木箱塔 (p / mp / f) -->
+          <g transform="translate(135, 112)">
+            <rect x="-13" y="-22" width="26" height="20" rx="4" fill="#f59f56" stroke="#3a2e25" stroke-width="2"/>
+            <rect x="-13" y="-42" width="26" height="20" rx="4" fill="#f59f56" stroke="#3a2e25" stroke-width="2"/>
+            <circle cx="0" cy="-54" r="11" fill="#4bb8e8" stroke="#3a2e25" stroke-width="2"/>
+            <circle cx="0" cy="-54" r="8" fill="#fffdf7"/>
+            <text x="0" y="-51" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-weight="bold" font-size="11" fill="#217da8">p</text>
+          </g>
+          <g transform="translate(184, 112)">
+            <rect x="-13" y="-22" width="26" height="20" rx="4" fill="#f59f56" stroke="#3a2e25" stroke-width="2"/>
+            <rect x="-13" y="-42" width="26" height="20" rx="4" fill="#f59f56" stroke="#3a2e25" stroke-width="2"/>
+            <circle cx="0" cy="-54" r="11" fill="#52bf7a" stroke="#3a2e25" stroke-width="2"/>
+            <circle cx="0" cy="-54" r="8" fill="#fffdf7"/>
+            <text x="0" y="-51" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-weight="bold" font-size="10" fill="#288249">mp</text>
+          </g>
+          <g transform="translate(234, 112)">
+            <rect x="-13" y="-22" width="26" height="20" rx="4" fill="#f59f56" stroke="#3a2e25" stroke-width="2"/>
+            <rect x="-13" y="-42" width="26" height="20" rx="4" fill="#f59f56" stroke="#3a2e25" stroke-width="2"/>
+            <rect x="-13" y="-62" width="26" height="20" rx="4" fill="#f59f56" stroke="#3a2e25" stroke-width="2"/>
+            <circle cx="0" cy="-74" r="11" fill="#ff8b3d" stroke="#3a2e25" stroke-width="2"/>
+            <circle cx="0" cy="-74" r="8" fill="#fffdf7"/>
+            <text x="0" y="-71" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-weight="bold" font-size="11" fill="#bf5411">f</text>
+          </g>
+        </svg>
+        <div class="dioramaRack">
+          <div class="dChip"><span class="serif" style="color:#217da8">p</span> 近距弱音塔</div>
+          <div class="dChip"><span class="serif" style="color:#288249">mp</span> 中距中弱塔</div>
+          <div class="dChip"><span class="serif" style="color:#bf5411">f</span> 遠距強音塔</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 內嵌遊戲木框舞台區 -->
+  <section class="stageSection" id="gameStage">
+    <div class="stageFrame" id="stageCard">
+      <div class="stageToolbar">
+        <div class="windowLights">
+          <span class="jewel red"></span>
+          <span class="jewel amber"></span>
+          <span class="jewel green"></span>
+          <span class="stageTitle">力度彈弓 · 互動遊戲視窗（內嵌自 game.html）</span>
+        </div>
+        <div class="stageActions">
+          <button class="woodBtn" id="reloadBtn">重新開始本局</button>
+          <button class="woodBtn" id="theaterBtn">展開寬螢幕模式</button>
+          <a href="game.html" target="_blank" class="woodBtn orange">開啟獨立全螢幕頁</a>
+        </div>
+      </div>
+
+      <div class="iframeRecess">
+        <!-- 與遊戲內部彈窗風格一致的奶油木框啟動遮罩 -->
+        <div id="startOverlay">
+          <div class="ovBoard">
+            <span class="rivet cornerRivet tl"></span>
+            <span class="rivet cornerRivet tr"></span>
+            <span class="rivet cornerRivet bl"></span>
+            <span class="rivet cornerRivet br"></span>
+            <div class="ovTag">READY TO PLAY</div>
+            <h3>準備好與音樂山雀一起闖關了嗎？</h3>
+            <p>按下下方 START 按鈕立即開啟鼓聲音源並進入晴空草原舞台，或點選右上角切換至獨立全螢幕頁面。</p>
+            <button class="tactileStartBtn" id="overlayStartBtn">
+              <span class="playTriangle">
+                <svg viewBox="0 0 12 14"><polygon points="1,1 11,7 1,13"/></svg>
+              </span>
+              <span>START 啟動遊戲</span>
+            </button>
+          </div>
+        </div>
+        <iframe id="gameFrame" src="game.html" title="力度彈弓音樂小遊戲" allow="fullscreen; autoplay"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- 玩法介紹四步驟 -->
+  <section id="howToPlay">
+    <div class="secHead">
+      <div class="woodSign">
+        <span class="rivet"></span>
+        <span>HOW TO PLAY</span>
+        <span class="rivet"></span>
+      </div>
+      <h2>四步驟玩法教學</h2>
+      <p>手眼耳並用，結合小鼓強弱示範與彈弓張力控制</p>
+    </div>
+    <div class="grid4">
+      <div class="stepCard">
+        <div class="stepHeader">
+          <span class="stepBadge">STEP 01</span>
+          <span class="rivet"></span>
+        </div>
+        <h3>聆聽小鼓題目順序</h3>
+        <p>每關開始時會依序敲擊小鼓，示範本關的<strong>力度變化順序</strong>。可隨時點擊上方喇叭鈕或順序數字重聽。</p>
+      </div>
+      <div class="stepCard">
+        <div class="stepHeader">
+          <span class="stepBadge">STEP 02</span>
+          <span class="rivet"></span>
+        </div>
+        <h3>拉弓決定仰角與力度</h3>
+        <p>按住畫面往左下拖曳：<strong>拉弓距離越長，代表音樂力度越強（<span class="serif">p</span> 至 <span class="serif">f</span>）</strong>，小鳥飛行的距離也越遠。</p>
+      </div>
+      <div class="stepCard">
+        <div class="stepHeader">
+          <span class="stepBadge">STEP 03</span>
+          <span class="rivet"></span>
+        </div>
+        <h3>依序擊倒對應木箱塔</h3>
+        <p>放開滑鼠發射山雀並敲響鼓聲！<strong>發射力度必須與目標木塔頂端的圓牌記號一致</strong>且順序正確，木塔才會倒下。</p>
+      </div>
+      <div class="stepCard">
+        <div class="stepHeader">
+          <span class="stepBadge">STEP 04</span>
+          <span class="rivet"></span>
+        </div>
+        <h3>累積星星解鎖新小鳥</h3>
+        <p>正中木塔核心可獲 <strong>PERFECT</strong> 加分！收集過關星星可解鎖「藍天山雀、森林青鳥、櫻花玄鳳、皇家金絲雀」。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 遊戲木箱音箱造型「力度試聽鍵」（與遊戲內的木箱塔完全呼應） -->
+  <section id="dynamicsGuide">
+    <div class="secHead">
+      <div class="woodSign">
+        <span class="rivet"></span>
+        <span>WOODEN SPEAKER PADS</span>
+        <span class="rivet"></span>
+      </div>
+      <h2>木箱音箱力度試聽台（點擊木箱試聽鼓聲）</h2>
+      <p>直接按壓下方任一座木箱音箱，即可聽見遊戲內真實對應的小鼓強弱音色</p>
+    </div>
+    <div class="crateGrid">
+      <div class="cratePad" data-vol="0.12" data-tx="110" data-ty="78">
+        <span class="rivet cornerRivet tl"></span>
+        <span class="rivet cornerRivet tr"></span>
+        <div class="tapHint">CLICK TO PLAY</div>
+        <div class="crateInner">
+          <div class="towerMedallion" style="background:#5998e6">
+            <div class="medallionCore serif" style="color:#2d66b3">pp</div>
+          </div>
+          <h4>很弱</h4>
+          <div class="ital">Pianissimo</div>
+          <div class="rangeSlot"><div class="rangeFill" style="width:16%;background:#5998e6"></div></div>
+          <p>像微風拂過草地，輕拉一點點即可到達。</p>
+        </div>
+      </div>
+
+      <div class="cratePad" data-vol="0.25" data-tx="135" data-ty="68">
+        <span class="rivet cornerRivet tl"></span>
+        <span class="rivet cornerRivet tr"></span>
+        <div class="tapHint">CLICK TO PLAY</div>
+        <div class="crateInner">
+          <div class="towerMedallion" style="background:#4bb8e8">
+            <div class="medallionCore serif" style="color:#217da8">p</div>
+          </div>
+          <h4>弱</h4>
+          <div class="ital">Piano</div>
+          <div class="rangeSlot"><div class="rangeFill" style="width:30%;background:#4bb8e8"></div></div>
+          <p>溫柔的搖籃曲音量，對應近距離木塔。</p>
+        </div>
+      </div>
+
+      <div class="cratePad" data-vol="0.45" data-tx="184" data-ty="68">
+        <span class="rivet cornerRivet tl"></span>
+        <span class="rivet cornerRivet tr"></span>
+        <div class="tapHint">CLICK TO PLAY</div>
+        <div class="crateInner">
+          <div class="towerMedallion" style="background:#52bf7a">
+            <div class="medallionCore serif" style="color:#288249">mp</div>
+          </div>
+          <h4>中弱</h4>
+          <div class="ital">Mezzo-piano</div>
+          <div class="rangeSlot"><div class="rangeFill" style="width:48%;background:#52bf7a"></div></div>
+          <p>比弱再稍微清晰一些，步伐輕快穩定。</p>
+        </div>
+      </div>
+
+      <div class="cratePad" data-vol="0.68" data-tx="205" data-ty="62">
+        <span class="rivet cornerRivet tl"></span>
+        <span class="rivet cornerRivet tr"></span>
+        <div class="tapHint">CLICK TO PLAY</div>
+        <div class="crateInner">
+          <div class="towerMedallion" style="background:#96c942">
+            <div class="medallionCore serif" style="color:#5e8a16">mf</div>
+          </div>
+          <h4>中強</h4>
+          <div class="ital">Mezzo-forte</div>
+          <div class="rangeSlot"><div class="rangeFill" style="width:68%;background:#96c942"></div></div>
+          <p>自然飽滿的朗讀音量，位於中遠距離。</p>
+        </div>
+      </div>
+
+      <div class="cratePad" data-vol="0.88" data-tx="234" data-ty="52">
+        <span class="rivet cornerRivet tl"></span>
+        <span class="rivet cornerRivet tr"></span>
+        <div class="tapHint">CLICK TO PLAY</div>
+        <div class="crateInner">
+          <div class="towerMedallion" style="background:#ff8b3d">
+            <div class="medallionCore serif" style="color:#bf5411">f</div>
+          </div>
+          <h4>強</h4>
+          <div class="ital">Forte</div>
+          <div class="rangeSlot"><div class="rangeFill" style="width:86%;background:#ff8b3d"></div></div>
+          <p>充滿精神的進行曲，需要大幅拉開彈弓。</p>
+        </div>
+      </div>
+
+      <div class="cratePad" data-vol="1.00" data-tx="262" data-ty="44">
+        <span class="rivet cornerRivet tl"></span>
+        <span class="rivet cornerRivet tr"></span>
+        <div class="tapHint">CLICK TO PLAY</div>
+        <div class="crateInner">
+          <div class="towerMedallion" style="background:#f05248">
+            <div class="medallionCore serif" style="color:#b5261d">ff</div>
+          </div>
+          <h4>很強</h4>
+          <div class="ital">Fortissimo</div>
+          <div class="rangeSlot"><div class="rangeFill" style="width:100%;background:#f05248"></div></div>
+          <p>樂曲最高潮的雷鳴音量，拉到底全力發射。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 雙欄操作與模式面板 -->
+  <section class="grid2">
+    <div class="infoPanel">
+      <span class="rivet cornerRivet tl"></span>
+      <span class="rivet cornerRivet tr"></span>
+      <h3>操作方式與鍵盤快捷鍵</h3>
+      <ul class="keyList">
+        <li><kbd>滑鼠 / 觸控拖曳</kbd> 自由控制發射仰角與拉弓力度（推薦玩法）</li>
+        <li><kbd>Space 空白鍵</kbd> 長按蓄力、放開發射（固定 50 度仰角）</li>
+        <li><kbd>數字鍵 1 - 6</kbd> 或點擊遊戲底部彩色力度鍵直接發射</li>
+        <li><kbd>飛行中點擊畫面</kbd> 立即略過飛行過程，迅速補位拉下一發</li>
+        <li><kbd>P</kbd> 暫停遊戲 · <kbd>R</kbd> 重新開始本關 · <kbd>M</kbd> 聲音開關</li>
+      </ul>
+    </div>
+    <div class="infoPanel">
+      <span class="rivet cornerRivet tl"></span>
+      <span class="rivet cornerRivet tr"></span>
+      <h3>四大教學模式與場景主題</h3>
+      <ul class="keyList">
+        <li><kbd>分級闖關</kbd> 依一至五年級課綱設計（漸強、漸弱、小海浪）</li>
+        <li><kbd>無盡模式</kbd> 三顆愛心生存挑戰，每三輪可選雙倍分或風力加成</li>
+        <li><kbd>耳力訓練</kbd> 純聽覺考驗，仔細聽三聲鼓響並依序按壓正確力度</li>
+        <li><kbd>四大主題</kbd> 選單可切換「晴空草原 / 黃昏晚霞 / 寧靜星夜 / 夢幻太空」</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 創作者與音樂頻道木製共鳴箱專區 (含兩個指定超連結) -->
+  <section class="creatorBox">
+    <div class="creatorInner">
+      <span class="rivet cornerRivet tl"></span>
+      <span class="rivet cornerRivet tr"></span>
+      <span class="rivet cornerRivet bl"></span>
+      <span class="rivet cornerRivet br"></span>
+
+      <div class="creatorText">
+        <div class="cLabel">CREATOR & MUSIC CHANNEL</div>
+        <h3>追蹤更多音樂教學創意與作品</h3>
+        <p>喜歡《力度彈弓》互動教材嗎？歡迎前往創作者的 Threads 交流音樂教育想法，或訂閱 YouTube 頻道收看更多精彩音樂內容。</p>
+      </div>
+      <div class="creatorLinks">
+        <a href="https://www.threads.com/@lycbert" target="_blank" rel="noopener noreferrer" class="socialHardwareBtn threads">
+          <span class="emblemBox">@</span>
+          <div>
+            <div style="font-size:11px;color:#cbbba8;letter-spacing:1px;">THREADS</div>
+            <div>@lycbert</div>
+          </div>
+        </a>
+        <a href="https://www.youtube.com/@datoemusic" target="_blank" rel="noopener noreferrer" class="socialHardwareBtn youtube">
+          <span class="emblemBox">YT</span>
+          <div>
+            <div style="font-size:11px;color:#ffd2cf;letter-spacing:1px;">YOUTUBE</div>
+            <div>@datoemusic</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div>力度彈弓 · 音樂力度互動教學網 ｜ 支援教室互動大屏與平板觸控操作</div>
+  <div class="footerLinks">
+    <a href="game.html" target="_blank">開啟獨立遊戲頁 (game.html)</a>
+    <span>|</span>
+    <a href="https://www.threads.com/@lycbert" target="_blank" rel="noopener noreferrer">Threads: @lycbert</a>
+    <span>|</span>
+    <a href="https://www.youtube.com/@datoemusic" target="_blank" rel="noopener noreferrer">YouTube: @datoemusic</a>
+  </div>
+</footer>
+
+<script>
+  const stageCard = document.getElementById("stageCard");
+  const theaterBtn = document.getElementById("theaterBtn");
+  const reloadBtn = document.getElementById("reloadBtn");
+  const gameFrame = document.getElementById("gameFrame");
+  const startOverlay = document.getElementById("startOverlay");
+  const heroStartBtn = document.getElementById("heroStartBtn");
+  const overlayStartBtn = document.getElementById("overlayStartBtn");
+  const previewArc = document.getElementById("previewArc");
+
+  // 啟動遊戲並收起遮罩
+  function startGameNow(scrollToStage) {
+    startOverlay.classList.add("hidden");
+    if (scrollToStage) {
+      document.getElementById("gameStage").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    setTimeout(() => {
+      try { gameFrame.contentWindow.focus(); } catch(e) {}
+    }, 300);
+  }
+
+  heroStartBtn.addEventListener("click", () => startGameNow(true));
+  overlayStartBtn.addEventListener("click", () => startGameNow(false));
+
+  // 寬螢幕模式切換
+  theaterBtn.onclick = () => {
+    stageCard.classList.toggle("theater");
+    theaterBtn.textContent = stageCard.classList.contains("theater") ? "恢復標準視窗" : "展開寬螢幕模式";
+    setTimeout(() => {
+      try { gameFrame.contentWindow.focus(); } catch(e) {}
+    }, 100);
+  };
+
+  // 重新載入遊戲
+  reloadBtn.onclick = () => {
+    startOverlay.classList.add("hidden");
+    gameFrame.contentWindow.location.reload();
+  };
+
+  // 木箱音箱試聽合成器（與 game.html 內建鼓聲完全相同）
+  let demoAC = null;
+  function playDemoDrum(vol) {
+    try {
+      if (!demoAC) demoAC = new (window.AudioContext || window.webkitAudioContext)();
+      if (demoAC.state === "suspended") demoAC.resume();
+      const t = demoAC.currentTime;
+      const v = Math.pow(vol, 1.35);
+
+      const o = demoAC.createOscillator();
+      const g = demoAC.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(165, t);
+      o.frequency.exponentialRampToValueAtTime(50, t + 0.28);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(Math.max(0.03, v), t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+      o.connect(g).connect(demoAC.destination);
+      o.start(t);
+      o.stop(t + 0.45);
+
+      const n = Math.floor(demoAC.sampleRate * 0.09);
+      const b = demoAC.createBuffer(1, n, demoAC.sampleRate);
+      const d = b.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+      const s = demoAC.createBufferSource();
+      s.buffer = b;
+      const f = demoAC.createBiquadFilter();
+      f.type = "lowpass";
+      f.frequency.value = 500 + 900 * vol;
+      const g2 = demoAC.createGain();
+      g2.gain.setValueAtTime(v * 0.5, t);
+      g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+      s.connect(f).connect(g2).connect(demoAC.destination);
+      s.start(t);
+    } catch (e) {}
+  }
+
+  document.querySelectorAll(".cratePad").forEach(pad => {
+    pad.addEventListener("click", () => {
+      const vol = parseFloat(pad.dataset.vol || "0.5");
+      const tx = parseFloat(pad.dataset.tx || "200");
+      const ty = parseFloat(pad.dataset.ty || "60");
+      playDemoDrum(vol);
+      if (previewArc) {
+        const cx = Math.round((42 + tx) / 2);
+        previewArc.setAttribute("d", `M 42 58 Q ${cx} 2 ${tx} ${ty}`);
+      }
+      pad.classList.add("playing");
+      setTimeout(() => pad.classList.remove("playing"), 160);
+    });
+  });
+</script>
+</body>
+</html>
